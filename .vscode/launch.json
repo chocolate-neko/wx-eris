@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "command": "npm start",
+            "name": "Run npm start",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
+            "name": "Launch Program",
+            "program": "${workspaceFolder}/js/index.js",
+            "request": "launch",
+            "skipFiles": ["<node_internals>/**"],
+            "type": "node"
+        }
+    ]
+}

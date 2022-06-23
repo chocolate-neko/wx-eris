@@ -1,0 +1,26 @@
+{
+    "name": "tsu-eris",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./js/index.js",
+    "scripts": {
+        "start": "tsc && node ./js/index.js",
+        "beep": "echo boop && exit 0",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "domhandler": "^5.0.3",
+        "domutils": "^3.0.1",
+        "eris": "^0.16.1",
+        "htmlparser2": "^8.0.1",
+        "postgres": "^3.2.4",
+        "tabletojson": "^2.0.7",
+        "wtf_wikipedia": "^10.0.0"
+    },
+    "devDependencies": {
+        "@types/node": "^17.0.33"
+    }
+}
