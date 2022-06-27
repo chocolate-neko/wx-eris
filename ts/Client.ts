@@ -25,7 +25,7 @@ export class Bot extends Client {
         // console.log(FileManager.recurssiveWalk('./js', (f) => /.js$/.test(f)));
         // CommandManager.loadCommands(commandPath);
         // this.connect();
-        WikiManager.parseWikiHTML('WXDi-D01_DIVA_DEBUT_DECK_ANCIENT_SURPRISE');
+        WikiManager.parseWikiHTML('WXDi-P00_INTERLUDE_DIVA');
         this.on('ready', () => {
             console.log(
                 `[${this.constructor.name.toUpperCase()}] ${

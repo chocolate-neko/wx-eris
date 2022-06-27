@@ -24,7 +24,7 @@ export default class WikiManager {
         }
     }
 
-    public static async parseWikiHTML(search: string): Promise<string> {
+    public static async parseWikiHTML(search: string): Promise<string[][]> {
         const wikiHTML = await this.fetchData(search);
         let elements: Element[] = [];
 
@@ -56,9 +56,9 @@ export default class WikiManager {
         parser.end();
 
         // console.log(render(elements));
-        this.parseTableToArray(elements);
+        return this.parseTableToArray(elements);
 
-        return wikiHTML;
+        // return wikiHTML;
     }
 
     private static parseTableToArray(elementsArr: Element[]) {
@@ -71,10 +71,49 @@ export default class WikiManager {
             // elem.childNodes.forEach((child) => {
             //     console.log(render(child) + '\n####### NEW LINE #######');
             // });
-            elements.push(DomUtils.getElementsByTagName('tbody', elem));
-            console.log(render(DomUtils.getElementsByTagName('tbody', elem)));
+            elements.push(DomUtils.getElementsByTagName('tr', elem));
+            // console.log(render(DomUtils.getElementsByTagName('tr', elem)));
         });
-        console.log(elements.length);
+        // console.log(elements.length);
+
+        let tableArray: Array<string[]> = [];
+        elements.forEach((element) => {
+            let rowArray: string[] = [];
+            const tableData = DomUtils.findAll(
+                (e) => e.name === 'td' || e.name === 'th',
+                element,
+            );
+            if (tableData.length > 0) {
+                tableData.forEach((data) => {
+                    const text = render(data)
+                        .replace(
+                            /<img.*?alt="(.*?)"[^\>]+>|<(?:a\b[^>]*>|\/a>)/g,
+                            '$1',
+                        )
+                        .replace(/<[^>]*>/g, '')
+                        .replace(/\.png|\.jpg/g, '');
+                    if (text !== '\n') {
+                        rowArray.push(
+                            this.decodeCharRefs(text.trim().replace('\n', '')),
+                        );
+                    }
+                });
+                tableArray.push(rowArray);
+            }
+        });
+
+        return tableArray;
+    }
+
+    // https://stackoverflow.com/questions/16400641/can-hexadecimal-html-be-systematically-converted-to-unicode-via-javascript
+    private static decodeCharRefs(string: string) {
+        return string
+            .replace(/&#(\d+);/g, function (match, num) {
+                return String.fromCodePoint(num);
+            })
+            .replace(/&#x([A-Za-z0-9]+);/g, function (match, num) {
+                return String.fromCodePoint(parseInt(num, 16));
+            });
     }
 }
 
