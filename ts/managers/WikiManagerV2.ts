@@ -2,7 +2,58 @@ import DomHandler, { Element } from 'domhandler';
 import { DomUtils, Parser } from 'htmlparser2';
 import render from 'dom-serializer';
 const WIKI_URL: string = 'https://wixoss.fandom.com/api.php?';
+const IMAGETEXT_FORMAT_STRING: string = '||$1||';
 
+const HTML_ENTITIES = [
+    {
+        name: '&nbsp;',
+        value: '&#160;',
+    },
+    {
+        name: '&lt;',
+        value: '&#60;',
+    },
+    {
+        name: '&gt;',
+        value: '&#62;',
+    },
+    {
+        name: '&amp;',
+        value: '&#38;',
+    },
+    {
+        name: '&quot;',
+        value: '&#34;',
+    },
+    {
+        name: '&apos;',
+        value: '&#39;',
+    },
+    {
+        name: '&cent;',
+        value: '&#162;',
+    },
+    {
+        name: '&pound;',
+        value: '&#163;',
+    },
+    {
+        name: '&yen;',
+        value: '&#165;',
+    },
+    {
+        name: '&euro;',
+        value: '&#8364;',
+    },
+    {
+        name: '&copy;',
+        value: '&#169;',
+    },
+    {
+        name: '&reg;',
+        value: '&#174;',
+    },
+];
 export default class WikiManager {
     public static async fetchData(searchTerm: string): Promise<string> {
         const url =
@@ -87,14 +138,15 @@ export default class WikiManager {
                 tableData.forEach((data) => {
                     const text = render(data)
                         .replace(
-                            /<img.*?alt="(.*?)"[^\>]+>|<(?:a\b[^>]*>|\/a>)/g,
-                            '$1',
+                            /<img.*?alt="(.*?)"[^\>]+>/g,
+                            IMAGETEXT_FORMAT_STRING,
                         )
+                        .replace(/<(?:a\b[^>]*>|\/a>)/g, '')
                         .replace(/<[^>]*>/g, '')
                         .replace(/\.png|\.jpg/g, '');
                     if (text !== '\n') {
                         rowArray.push(
-                            this.decodeCharRefs(text.trim().replace('\n', '')),
+                            this.decode(text.trim().replace('\n', '')),
                         );
                     }
                 });
@@ -106,14 +158,25 @@ export default class WikiManager {
     }
 
     // https://stackoverflow.com/questions/16400641/can-hexadecimal-html-be-systematically-converted-to-unicode-via-javascript
-    private static decodeCharRefs(string: string) {
-        return string
+    private static decode(string: string) {
+        const decodedHTML = this.decodeHTML(string);
+        return decodedHTML
             .replace(/&#(\d+);/g, function (match, num) {
                 return String.fromCodePoint(num);
             })
             .replace(/&#x([A-Za-z0-9]+);/g, function (match, num) {
                 return String.fromCodePoint(parseInt(num, 16));
             });
+    }
+
+    private static decodeHTML(string: string) {
+        return string.replace(/&([A-Za-z0-9]+);/g, (match) => {
+            console.log(match);
+            return (
+                HTML_ENTITIES.find((v) => v.name === match)?.value ??
+                'undefined'
+            );
+        });
     }
 }
 
