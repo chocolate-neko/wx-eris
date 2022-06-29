@@ -77,12 +77,26 @@ export default class WikiManager {
 
     public static async parseWikiHTML(search: string): Promise<string[][]> {
         const wikiHTML = await this.fetchData(search);
+        let returnArray: string[][] = [];
         let elements: Element[] = [];
+        let cardImg: string[] = [];
 
         const handler = new DomHandler((err, dom) => {
             if (err) {
                 console.error(err);
             }
+
+            cardImg.push(
+                DomUtils.getElementsByTagName(
+                    'img',
+                    DomUtils.findAll(
+                        (elem) =>
+                            (elem.attribs.class ?? '').includes('image') &&
+                            elem.name === 'a',
+                        dom,
+                    ),
+                )[0].attribs.src,
+            );
 
             elements = DomUtils.getElementsByTagName(
                 'table',
@@ -107,7 +121,12 @@ export default class WikiManager {
         parser.end();
 
         // console.log(render(elements));
-        return this.parseTableToArray(elements);
+        // returnArray.push(cardImg);
+        // returnArray.push(this.parseTableToArray(elements));
+        // return returnArray;
+        returnArray = this.parseTableToArray(elements);
+        returnArray.unshift(cardImg);
+        return returnArray;
 
         // return wikiHTML;
     }
