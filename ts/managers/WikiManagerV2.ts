@@ -1,8 +1,15 @@
 import DomHandler, { Element } from 'domhandler';
 import { DomUtils, Parser } from 'htmlparser2';
+import _ from 'lodash';
 import render from 'dom-serializer';
 const WIKI_URL: string = 'https://wixoss.fandom.com/api.php?';
 const IMAGETEXT_FORMAT_STRING: string = '||$1||';
+const ELEMENT_FILTER = (elem: Element) =>
+    ((elem.attribs.class ?? '').includes('info-main') ||
+        (elem.attribs.class ?? '').includes('info-extra') ||
+        (elem.attribs.class ?? '').includes('wds-tab__content') ||
+        (elem.attribs.class ?? '').includes('mw-parser-output')) &&
+    elem.name === 'div';
 
 const HTML_ENTITIES = [
     {
@@ -100,19 +107,7 @@ export default class WikiManager {
 
             elements = DomUtils.getElementsByTagName(
                 'table',
-                DomUtils.findAll(
-                    (elem) =>
-                        ((elem.attribs.class ?? '').includes('info-main') ||
-                            (elem.attribs.class ?? '').includes('info-extra') ||
-                            (elem.attribs.class ?? '').includes(
-                                'wds-tab__content',
-                            ) ||
-                            (elem.attribs.class ?? '').includes(
-                                'mw-parser-output',
-                            )) &&
-                        elem.name === 'div',
-                    dom,
-                ),
+                DomUtils.findAll(ELEMENT_FILTER, dom),
             );
         });
 

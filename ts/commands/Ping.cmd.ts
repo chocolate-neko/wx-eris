@@ -6,9 +6,15 @@ import {
 import { Bot } from '../Client';
 import { _Command } from '../managers/CommandManager';
 
-export default class Ping extends _Command {
+export default class Ping implements _Command {
+    public name: string;
+    public description: string;
+    public aliases?: string[] | undefined;
+
     constructor() {
-        super('ping', 'ping...', ['pong']);
+        this.name = 'ping';
+        this.description = 'A ping command';
+        this.aliases = ['pong'];
     }
 
     public async execute(

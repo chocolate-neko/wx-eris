@@ -1,3 +1,5 @@
+import { Message, PossiblyUncachedTextableChannel } from 'eris';
+import { Bot, COMMAND_PREFIX } from '../Client';
 import FileManager from './FileManager';
 
 export class CommandManager {
@@ -31,8 +33,33 @@ export class CommandManager {
         }
     }
 
-    public static getCommand(name: string): _Command | undefined {
-        return this.commands.get(name);
+    public static parseCommand(msgContent: string): string {
+        return msgContent.split(' ')[0].replace(COMMAND_PREFIX, '').trim();
+    }
+
+    public static parseArgs(msgContent: string): string[] {
+        const splitMsg = msgContent.split(' ');
+        if (splitMsg.length <= 1) return [];
+        return splitMsg.slice(1, splitMsg.length);
+    }
+
+    public static getCommand(name: string): _Command | false {
+        // return this.commands.get(name);
+        const commandWithName = this.commands.get(name);
+        if (commandWithName) return commandWithName;
+
+        let commandWithAlias: _Command | false = false;
+        const commandArr = this.getCommands();
+
+        for (let i = 0; i < commandArr.length; i++) {
+            if (
+                commandArr[i].aliases &&
+                (commandArr[i].aliases ?? []).includes(name)
+            )
+                commandWithAlias = commandArr[i];
+            break;
+        }
+        return commandWithAlias;
     }
 
     public static getCommands(): _Command[] {
@@ -44,27 +71,34 @@ export class CommandManager {
     }
 }
 
-export class _Command {
-    public name: string;
-    public description: string;
-    public aliases: string[];
-    public usage: string;
-    public category: string;
-    public guildOnly: boolean;
+export interface _Command {
+    name: string;
+    description: string;
+    aliases?: string[];
+    usage?: string;
+    category?: string;
+    guildOnly?: boolean;
+    authorOnly?: boolean;
 
-    public constructor(
-        name: string,
-        description: string,
-        aliases?: string[],
-        usage?: string,
-        category?: string,
-        guildOnly?: boolean,
-    ) {
-        this.name = name;
-        this.description = description;
-        this.aliases = aliases ?? [];
-        this.usage = usage ?? '';
-        this.category = category ?? 'Default';
-        this.guildOnly = guildOnly ?? false;
-    }
+    // public constructor(
+    //     name: string,
+    //     description: string,
+    //     aliases?: string[],
+    //     usage?: string,
+    //     category?: string,
+    //     guildOnly?: boolean,
+    // ) {
+    //     this.name = name;
+    //     this.description = description;
+    //     this.aliases = aliases ?? [];
+    //     this.usage = usage ?? '';
+    //     this.category = category ?? 'Default';
+    //     this.guildOnly = guildOnly ?? false;
+    // }
+
+    execute(
+        msg: Message<PossiblyUncachedTextableChannel>,
+        args: string[],
+        client: Bot,
+    ): Promise<void>;
 }
