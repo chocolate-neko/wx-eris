@@ -14,7 +14,7 @@
     "dependencies": {
         "domhandler": "^5.0.3",
         "domutils": "^3.0.1",
-        "eris": "^0.16.1",
+        "eris": "^0.17.1",
         "htmlparser2": "^8.0.1",
         "lodash": "^4.17.21",
         "postgres": "^3.2.4",
