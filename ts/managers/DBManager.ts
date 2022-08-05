@@ -1,14 +1,11 @@
-import postgres from 'postgres';
 import { setTimeout } from 'timers/promises';
-const dbConfig = require('../../db.json');
+import sql from './DB';
 
 const SEARCH_URL =
     'https://www.takaratomy.co.jp/products/en.wixoss/card/itemsearch.php?';
 const UPDATE_PAGE_QUERY = 'UPDATE wixoss_en_page_count SET page = page + 1';
 
 const FETCH_ERROR_PARITY = 'ohhh... now you fucked up...';
-
-const sql = postgres(dbConfig);
 
 export default class DBManager {
     public static async fetchFromWeb(): Promise<string> {
