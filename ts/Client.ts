@@ -3,6 +3,7 @@ import FileManager from './managers/FileManager';
 import UserUtils from './utils/UserUtils';
 import { CommandManager } from './managers/CommandManager';
 import WikiManager from './managers/WikiManagerV2';
+import DBManager from './managers/DBManager';
 
 // The path to the directory containing the commands.
 // No changes required unless directory is renamed or moved.
@@ -27,6 +28,7 @@ export class Bot extends Client {
 
         // console.log(FileManager.recurssiveWalk('./js', (f) => /.js$/.test(f)));
         CommandManager.loadCommands(commandPath);
+        // DBManager.pushToDB();
         this.connect();
         // console.log(await WikiManager.parseWikiHTML('Pinch_Defense'));
         this.once('ready', () => {
