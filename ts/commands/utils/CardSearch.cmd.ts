@@ -24,6 +24,17 @@ export default class CardSearch implements _Command {
     ): Promise<void> {
         const embed = await CardParsingManager.cardIDSearch(args[0]);
         if (!embed) client.createMessage(msg.channel.id, 'Invalid ID');
-        else client.createMessage(msg.channel.id, { embed: embed });
+        else {
+            let possibleMatchList: string = 'Possible Matches:\n';
+            for (let i = 1; i < 6; i++) {
+                try {
+                    possibleMatchList += `(${i}) ${embed.possibleMatches[i].name} [${embed.possibleMatches[i].card_no}]\n`;
+                } catch (e) {
+                    break;
+                }
+            }
+            client.createMessage(msg.channel.id, { embed: embed.embed });
+            client.createMessage(msg.channel.id, possibleMatchList);
+        }
     }
 }

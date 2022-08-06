@@ -1,4 +1,5 @@
 import { EmbedOptions } from 'eris';
+import { Row, RowList } from 'postgres';
 import sql from './DB';
 
 const cardColours = [
@@ -11,12 +12,19 @@ const cardColours = [
 ];
 
 const emoteReplace = [
-    { text: '[Constant]', emote: '' },
-    { text: '[Enter]', emote: '' },
-    { text: '[Auto]', emote: '' },
-    { text: '[Use Conditions]', emote: '' },
-    { text: '[Action]', emote: '' },
+    { text: '[Constant]', emote: '<:Const:1005444057725669397>' },
+    { text: '[Enter]', emote: '<:Enter:1005444060053524541>' },
+    { text: '[Auto]', emote: '<:Auto:1005444056106668052>' },
+    {
+        text: '[Use Conditions]',
+        emote: '<:UseCondition_1:1005478149586432070><:UseCondition_2:1005478151331262526>',
+    },
+    { text: '[Action]', emote: '<:Action:1005444054080835655>' },
     { text: '[Team]', emote: '' },
+    {
+        text: '[Rise]',
+        emote: '<:Rise_1:1005480238437908480><:Rise_2:1005480240631521340>',
+    },
     { text: '{Colorless}', emote: '' },
     { text: '{Red}', emote: '' },
     { text: '{Green}', emote: '' },
@@ -32,57 +40,95 @@ export default class CardParsingManager {
 
     public static async cardIDSearch(
         search: string,
-    ): Promise<EmbedOptions | undefined> {
-        const card =
-            await sql`SELECT * FROM wixoss_en WHERE SIMILARITY ( card_no, ${search} ) > 0.25`;
+    ): Promise<
+        { embed: EmbedOptions; possibleMatches: RowList<Row[]> } | undefined
+    > {
+        let card =
+            await sql`SELECT * FROM wixoss_en WHERE LOWER (card_no) LIKE LOWER (${
+                '%' + search + '%'
+            })`;
+
+        if (card.length == 0) {
+            card =
+                await sql`SELECT * FROM wixoss_en WHERE SIMILARITY(card_no, ${search}) > 0.3 OR levenshtein(card_no, ${search}) < 4`;
+        }
 
         if (card.length == 0) return undefined;
 
         return {
-            color: this.checkColours(card[0].color).value,
-            image: {
-                url: `https://www.takaratomy.co.jp/products/en.wixoss/card/thumb/${card[0].card_no}.jpg`,
+            embed: {
+                color: this.checkColours(card[0].color).value,
+                image: {
+                    url: `https://www.takaratomy.co.jp/products/en.wixoss/card/thumb/${card[0].card_no}.jpg`,
+                },
+                title: card[0].name,
+                description: this.replaceTextWithEmotes(
+                    this.checkEmpty(card[0].content),
+                ),
+                fields: [
+                    {
+                        name: 'Color',
+                        value: this.checkEmpty(
+                            this.checkColours(card[0].color).name,
+                        ),
+                        inline: true,
+                    },
+                    {
+                        name: 'Type',
+                        value: this.checkEmpty(card[0].card_type),
+                        inline: true,
+                    },
+                    {
+                        name: 'Level',
+                        value: this.checkEmpty(card[0].level),
+                        inline: true,
+                    },
+                    {
+                        name: 'Rarity',
+                        value: this.checkEmpty(card[0].rarity),
+                        inline: false,
+                    },
+                    {
+                        name: 'Grow Cost',
+                        value: this.checkEmpty(card[0].grow_cost),
+                        inline: true,
+                    },
+                    {
+                        name: 'Power',
+                        value: this.checkEmpty(card[0].power),
+                        inline: true,
+                    },
+                ],
+                footer: {
+                    text: `Card ID [EN]: ${card[0].card_no} | Card ID [JP]: ${card[0].JPN_card_no}`,
+                },
             },
-            title: card[0].name,
-            description: this.checkEmpty(card[0].content),
-            fields: [
-                {
-                    name: 'Color',
-                    value: this.checkEmpty(
-                        this.checkColours(card[0].color).name,
-                    ),
-                    inline: true,
-                },
-                {
-                    name: 'Type',
-                    value: this.checkEmpty(card[0].card_type),
-                    inline: true,
-                },
-                {
-                    name: 'Level',
-                    value: this.checkEmpty(card[0].level),
-                    inline: true,
-                },
-                {
-                    name: 'Rarity',
-                    value: this.checkEmpty(card[0].rarity),
-                    inline: false,
-                },
-                {
-                    name: 'Grow Cost',
-                    value: this.checkEmpty(card[0].grow_cost),
-                    inline: true,
-                },
-                {
-                    name: 'Power',
-                    value: this.checkEmpty(card[0].power),
-                    inline: true,
-                },
-            ],
-            footer: {
-                text: `Card ID [EN]: ${card[0].card_no} | Card ID [JP]: ${card[0].JPN_card_no}`,
-            },
+            possibleMatches: card,
         };
+    }
+
+    private static replaceTextWithEmotes(content: string) {
+        let text: string = content;
+
+        // emoteReplace.forEach((replacement) => {
+        //     text = content.replace(
+        //         replacement.text,
+        //         replacement.emote == '' ? replacement.text : replacement.emote,
+        //     );
+        // });
+
+        for (let i = 0; i < emoteReplace.length; i++) {
+            if (content.includes(emoteReplace[i].text)) {
+                text = text.replaceAll(
+                    emoteReplace[i].text,
+                    emoteReplace[i].emote === ''
+                        ? emoteReplace[i].text
+                        : emoteReplace[i].emote,
+                );
+            }
+        }
+
+        return text;
     }
 
     private static checkEmpty(string: string) {
