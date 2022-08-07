@@ -3,7 +3,7 @@ import { Bot } from '../../Client';
 import CardParsingManager from '../../managers/CardParsingManager';
 import { _Command } from '../../managers/CommandManager';
 
-export default class CardSearch implements _Command {
+export default class CardIDSearch implements _Command {
     name: string;
     description: string;
     aliases?: string[] | undefined;
@@ -13,8 +13,9 @@ export default class CardSearch implements _Command {
     authorOnly?: boolean | undefined;
 
     constructor() {
-        this.name = 'search';
+        this.name = 'idsearch';
         this.description = 'Search for cards by ID';
+        this.aliases = ['cid'];
     }
 
     public async execute(
@@ -22,7 +23,7 @@ export default class CardSearch implements _Command {
         args: string[],
         client: Bot,
     ): Promise<void> {
-        const embed = await CardParsingManager.cardIDSearch(args[0]);
+        const embed = await CardParsingManager.cardSearch(args[0]);
         if (!embed) client.createMessage(msg.channel.id, 'Invalid ID');
         else {
             let possibleMatchList: string = 'Possible Matches:\n';

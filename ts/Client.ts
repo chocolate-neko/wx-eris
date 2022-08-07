@@ -4,6 +4,7 @@ import UserUtils from './utils/UserUtils';
 import { CommandManager } from './managers/CommandManager';
 import WikiManager from './managers/WikiManagerV2';
 import DBManager from './managers/DBManager';
+import CardParsingManager from './managers/CardParsingManager';
 
 // The path to the directory containing the commands.
 // No changes required unless directory is renamed or moved.
@@ -44,7 +45,18 @@ export class Bot extends Client {
             );
         });
 
-        this.on('messageCreate', (msg) => {
+        this.on('messageCreate', async (msg) => {
+            if (
+                /https:\/\/wixoss.fandom.com\/wiki\/\w*[^\/]/g.test(msg.content)
+            ) {
+                const urlEmbed = await CardParsingManager.wikiURLSearch(
+                    msg.content,
+                );
+                this.createMessage(msg.channel.id, {
+                    embed: urlEmbed,
+                });
+            }
+
             if (!msg.content.includes(COMMAND_PREFIX)) return;
             if (msg.author.bot) return;
             const commandName = CommandManager.parseCommand(msg.content);

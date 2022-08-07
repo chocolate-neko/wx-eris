@@ -38,19 +38,16 @@ export default class CardParsingManager {
 
     // }
 
-    public static async cardIDSearch(
+    public static async cardSearch(
         search: string,
+        match: string = 'card_no',
     ): Promise<
         { embed: EmbedOptions; possibleMatches: RowList<Row[]> } | undefined
     > {
-        let card =
-            await sql`SELECT * FROM wixoss_en WHERE LOWER (card_no) LIKE LOWER (${
-                '%' + search + '%'
-            })`;
+        let card = await this.sqlStatementSwitch(search, match)[0];
 
         if (card.length == 0) {
-            card =
-                await sql`SELECT * FROM wixoss_en WHERE SIMILARITY(card_no, ${search}) > 0.3 OR levenshtein(card_no, ${search}) < 4`;
+            card = await this.sqlStatementSwitch(search, match)[1];
         }
 
         if (card.length == 0) return undefined;
@@ -105,6 +102,36 @@ export default class CardParsingManager {
             },
             possibleMatches: card,
         };
+    }
+
+    public static async wikiURLSearch(url: string) {
+        const name = url.substring(url.lastIndexOf('/') + 1);
+        const embed = await this.cardSearch(name, 'name');
+        return embed?.embed;
+    }
+
+    private static sqlStatementSwitch(search: string, match: string) {
+        switch (match) {
+            case 'card_no':
+                return [
+                    sql`SELECT * FROM wixoss_en WHERE LOWER (card_no) LIKE LOWER (${
+                        '%' + search + '%'
+                    })`,
+                    sql`SELECT * FROM wixoss_en WHERE SIMILARITY(card_no, ${search}) > 0.3 OR levenshtein(card_no, ${search}) < 4`,
+                ];
+            case 'name':
+                return [
+                    sql`SELECT * FROM wixoss_en WHERE LOWER (name) LIKE LOWER (${
+                        '%' + search + '%'
+                    })`,
+                    sql`SELECT * FROM wixoss_en WHERE SIMILARITY(name, ${search}) > 0.8 OR levenshtein(name, ${search}) < 9`,
+                ];
+            default:
+                return [
+                    sql`SELECT * FROM wixoss_en`,
+                    sql`SELECT * FROM wixoss_en`,
+                ];
+        }
     }
 
     private static replaceTextWithEmotes(content: string) {
