@@ -43,21 +43,22 @@ export class CommandManager {
         return splitMsg.slice(1, splitMsg.length);
     }
 
-    public static getCommand(name: string): _Command | false {
+    public static getCommand(name: string): _Command | undefined {
         // return this.commands.get(name);
         const commandWithName = this.commands.get(name);
         if (commandWithName) return commandWithName;
 
-        let commandWithAlias: _Command | false = false;
+        let commandWithAlias: _Command | undefined = undefined;
         const commandArr = this.getCommands();
 
         for (let i = 0; i < commandArr.length; i++) {
             if (
                 commandArr[i].aliases &&
                 (commandArr[i].aliases ?? []).includes(name)
-            )
+            ) {
                 commandWithAlias = commandArr[i];
-            break;
+                break;
+            }
         }
         return commandWithAlias;
     }

@@ -47,7 +47,7 @@ export class Bot extends Client {
 
         this.on('messageCreate', async (msg) => {
             if (
-                /https:\/\/wixoss.fandom.com\/wiki\/\w*[^\/]/g.test(msg.content)
+                /https:\/\/wixoss.fandom.com\/wiki\/.*[^\/]/g.test(msg.content)
             ) {
                 const urlEmbed = await CardParsingManager.wikiURLSearch(
                     msg.content,
@@ -61,7 +61,7 @@ export class Bot extends Client {
             if (msg.author.bot) return;
             const commandName = CommandManager.parseCommand(msg.content);
             const command = CommandManager.getCommand(commandName);
-            if (command === false) {
+            if (command === undefined) {
                 this.createMessage(
                     msg.channel.id,
                     `Command \`${commandName}\` is not a valid command`,

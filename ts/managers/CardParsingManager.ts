@@ -2,7 +2,7 @@ import { EmbedOptions } from 'eris';
 import { Row, RowList } from 'postgres';
 import sql from './DB';
 
-const cardColours = [
+const CARD_COLOURS = [
     { color: 'R', name: 'Red', value: 15675183 },
     { color: 'G', name: 'Green', value: 3457307 },
     { color: 'U', name: 'Blue', value: 1725884 },
@@ -11,7 +11,7 @@ const cardColours = [
     { color: 'C', name: 'Colourless', value: 8355711 },
 ];
 
-const emoteReplace = [
+const EMOTE_REPLACE = [
     { text: '[Constant]', emote: '<:Const:1005444057725669397>' },
     { text: '[Enter]', emote: '<:Enter:1005444060053524541>' },
     { text: '[Auto]', emote: '<:Auto:1005444056106668052>' },
@@ -126,6 +126,13 @@ export default class CardParsingManager {
                     })`,
                     sql`SELECT * FROM wixoss_en WHERE SIMILARITY(name, ${search}) > 0.8 OR levenshtein(name, ${search}) < 9`,
                 ];
+            case 'rarity':
+                return [
+                    sql`SELECT * FROM wixoss_en WHERE LOWER (rarity) LIKE LOWER (${
+                        '%' + search + '%'
+                    })`,
+                    sql`SELECT * FROM wixoss_en WHERE SIMILARITY(rarity, ${search}) > 0.7 OR levenshtein(rarity, ${search}) < 6`,
+                ];
             default:
                 return [
                     sql`SELECT * FROM wixoss_en`,
@@ -144,13 +151,13 @@ export default class CardParsingManager {
         //     );
         // });
 
-        for (let i = 0; i < emoteReplace.length; i++) {
-            if (content.includes(emoteReplace[i].text)) {
+        for (let i = 0; i < EMOTE_REPLACE.length; i++) {
+            if (content.includes(EMOTE_REPLACE[i].text)) {
                 text = text.replaceAll(
-                    emoteReplace[i].text,
-                    emoteReplace[i].emote === ''
-                        ? emoteReplace[i].text
-                        : emoteReplace[i].emote,
+                    EMOTE_REPLACE[i].text,
+                    EMOTE_REPLACE[i].emote === ''
+                        ? EMOTE_REPLACE[i].text
+                        : EMOTE_REPLACE[i].emote,
                 );
             }
         }
@@ -165,17 +172,17 @@ export default class CardParsingManager {
     private static checkColours(colour: string) {
         switch (colour.charAt(0)) {
             case 'R':
-                return cardColours[0];
+                return CARD_COLOURS[0];
             case 'G':
-                return cardColours[1];
+                return CARD_COLOURS[1];
             case 'U':
-                return cardColours[2];
+                return CARD_COLOURS[2];
             case 'B':
-                return cardColours[3];
+                return CARD_COLOURS[3];
             case 'W':
-                return cardColours[4];
+                return CARD_COLOURS[4];
             case 'C':
-                return cardColours[5];
+                return CARD_COLOURS[5];
             default:
                 return { color: 'undefined', name: 'undefined', value: 0 };
         }
