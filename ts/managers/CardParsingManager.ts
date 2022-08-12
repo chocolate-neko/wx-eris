@@ -11,28 +11,41 @@ const CARD_COLOURS = [
     { color: 'C', name: 'Colourless', value: 8355711 },
 ];
 
-const EMOTE_REPLACE = [
-    { text: '[Constant]', emote: '<:Const:1005444057725669397>' },
-    { text: '[Enter]', emote: '<:Enter:1005444060053524541>' },
-    { text: '[Auto]', emote: '<:Auto:1005444056106668052>' },
-    {
-        text: '[Use Conditions]',
-        emote: '<:UseCondition_1:1005478149586432070><:UseCondition_2:1005478151331262526>',
-    },
-    { text: '[Action]', emote: '<:Action:1005444054080835655>' },
-    { text: '[Team]', emote: '' },
-    {
-        text: '[Rise]',
-        emote: '<:Rise_1:1005480238437908480><:Rise_2:1005480240631521340>',
-    },
-    { text: '{Colorless}', emote: '' },
-    { text: '{Red}', emote: '' },
-    { text: '{Green}', emote: '' },
-    { text: '{Blue}', emote: '' },
-    { text: '{Black}', emote: '' },
-    { text: '{White}', emote: '' },
-    { text: '{Down}', emote: '' },
-];
+const EMOTE_MAP = new Map<string, string>([
+    ['[Constant]', '<:Const:1007584490765438976>'],
+    ['[Enter]', '<:Enter:1007584492573167636>'],
+    ['[Auto]', '<:Auto:1007584488613761035>'],
+    ['[Action]', '<:Action:1007584486973788251>'],
+    [
+        '[Team Constant]',
+        '<:Team_Cst:1007584498789126194><:Const:1007584490765438976>',
+    ],
+    [
+        '[Team Enter]',
+        '<:Team_Etr:1007584500915634177><:Enter:1007584492573167636>',
+    ],
+    [
+        '[Team Auto]',
+        '<:Team_Ato:1007584497002364958><:Auto:1007584488613761035>',
+    ],
+    [
+        '[Team Action]',
+        '<:Team_Act:1007584494800355328><:Action:1007584486973788251>',
+    ],
+    [
+        '[Use Conditions]',
+        '<:UseCondition_1:1005478149586432070><:UseCondition_2:1005478151331262526>',
+    ],
+    ['[Team]', ''],
+    ['[Rise]', '<:Rise_1:1005480238437908480><:Rise_2:1005480240631521340>'],
+    ['{Colorless}', '<:Colorless:1007589362210451466>'],
+    ['{Red}', '<:Red:1007589366228582410>'],
+    ['{Green}', '<:Green:1007589364072722462>'],
+    ['{Blue}', '<:Blue:1007589360616603708>'],
+    ['{Black}', '<:Black:1007589358708195449>'],
+    ['{White}', '<:White:1007589368174739517>'],
+    ['{Down}', ''],
+]);
 export default class CardParsingManager {
     // public static cardNameSearch(search: string): EmbedOptions[] {
 
@@ -144,23 +157,14 @@ export default class CardParsingManager {
     private static replaceTextWithEmotes(content: string) {
         let text: string = content;
 
-        // emoteReplace.forEach((replacement) => {
-        //     text = content.replace(
-        //         replacement.text,
-        //         replacement.emote == '' ? replacement.text : replacement.emote,
-        //     );
-        // });
-
-        for (let i = 0; i < EMOTE_REPLACE.length; i++) {
-            if (content.includes(EMOTE_REPLACE[i].text)) {
+        EMOTE_MAP.forEach((replacementEmote, textToReplace) => {
+            if (content.includes(textToReplace)) {
                 text = text.replaceAll(
-                    EMOTE_REPLACE[i].text,
-                    EMOTE_REPLACE[i].emote === ''
-                        ? EMOTE_REPLACE[i].text
-                        : EMOTE_REPLACE[i].emote,
+                    textToReplace,
+                    replacementEmote === '' ? textToReplace : replacementEmote,
                 );
             }
-        }
+        });
 
         return text;
     }
