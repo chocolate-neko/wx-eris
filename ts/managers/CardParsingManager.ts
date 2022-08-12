@@ -86,7 +86,7 @@ export default class CardParsingManager {
     public static async wikiURLSearch(url: string) {
         const name = url.substring(url.lastIndexOf('/') + 1);
         const embed = await this.cardSearch(name, 'name');
-        return embed?.embed;
+        return embed ?? undefined;
     }
 
     private static sqlStatementSwitch(search: string, match: string) {

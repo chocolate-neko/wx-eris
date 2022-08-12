@@ -47,14 +47,21 @@ export class Bot extends Client {
 
         this.on('messageCreate', async (msg) => {
             if (
-                /https:\/\/wixoss.fandom.com\/wiki\/.*[^\/]/g.test(msg.content)
+                /https:\/\/wixoss.fandom.com\/wiki\/.*[^\/]/g.test(
+                    msg.content,
+                ) &&
+                msg.content.charAt(0) !== '!'
             ) {
                 const urlEmbed = await CardParsingManager.wikiURLSearch(
                     msg.content,
                 );
-                this.createMessage(msg.channel.id, {
-                    embed: urlEmbed,
-                });
+                if (urlEmbed) {
+                    urlEmbed.embed.footer!.text +=
+                        '\nuse ! infront of a wiki link to prevent pop-ups';
+                    this.createMessage(msg.channel.id, {
+                        embed: urlEmbed.embed,
+                    });
+                }
             }
 
             if (!msg.content.includes(COMMAND_PREFIX)) return;
