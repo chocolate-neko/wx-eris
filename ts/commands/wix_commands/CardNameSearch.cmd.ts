@@ -23,7 +23,10 @@ export default class CardIDSearch implements _Command {
         args: string[],
         client: Bot,
     ): Promise<void> {
-        const embed = await CardParsingManager.cardSearch(args.join(), 'name');
+        const embed = await CardParsingManager.cardSearch(
+            args.join(' '),
+            'name',
+        );
         if (!embed)
             client.createMessage(msg.channel.id, 'No results or invalid name');
         else {

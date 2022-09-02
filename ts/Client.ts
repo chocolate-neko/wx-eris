@@ -1,10 +1,11 @@
-import { Client, ClientOptions } from 'eris';
+import Eris, { Client, ClientOptions, Constants } from 'eris';
 import FileManager from './managers/FileManager';
 import UserUtils from './utils/UserUtils';
 import { CommandManager } from './managers/CommandManager';
 import WikiManager from './managers/WikiManagerV2';
 import DBManager from './managers/DBManager';
 import CardParsingManager from './managers/CardParsingManager';
+import InteractionManager from './managers/InteractionManager';
 
 // The path to the directory containing the commands.
 // No changes required unless directory is renamed or moved.
@@ -32,7 +33,67 @@ export class Bot extends Client {
         // DBManager.pushToDB();
         this.connect();
         // console.log(await WikiManager.parseWikiHTML('Pinch_Defense'));
-        this.once('ready', () => {
+        this.once('ready', async () => {
+            // const commands = await this.getCommands();
+            // console.log(commands);
+            // if (!commands.length) {
+
+            this.bulkEditGuildCommands('959812566677340271', [
+                {
+                    name: 'search',
+                    description: 'Search for cards (users soon!)',
+                    type: Constants.ApplicationCommandTypes.CHAT_INPUT,
+                    options: [
+                        {
+                            name: 'card',
+                            description: 'Search a card by...',
+                            type: Constants.ApplicationCommandOptionTypes
+                                .SUB_COMMAND_GROUP,
+                            options: [
+                                {
+                                    name: 'by-name',
+                                    description: 'Search for a card by name',
+                                    type: Constants
+                                        .ApplicationCommandOptionTypes
+                                        .SUB_COMMAND,
+                                    options: [
+                                        {
+                                            name: 'name',
+                                            description: 'The card name',
+                                            type: Constants
+                                                .ApplicationCommandOptionTypes
+                                                .STRING,
+                                            required: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    name: 'by-id',
+                                    description:
+                                        'Search for a card by Wixoss card ID',
+                                    type: Constants
+                                        .ApplicationCommandOptionTypes
+                                        .SUB_COMMAND,
+                                    options: [
+                                        {
+                                            name: 'id',
+                                            description: 'The card ID',
+                                            type: Constants
+                                                .ApplicationCommandOptionTypes
+                                                .STRING,
+                                            required: true,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                    ],
+                },
+            ]);
+            // }
+
+            // ############################################
+
             this.editStatus({
                 name: `... ${COMMAND_PREFIX} to call`,
                 type: 1,
@@ -95,6 +156,48 @@ export class Bot extends Client {
 
             command.execute(msg, CommandManager.parseArgs(msg.content), this);
             return;
+        });
+
+        this.on('error', (error) => {
+            console.error(error);
+        });
+
+        this.on('interactionCreate', async (interaction) => {
+            InteractionManager.parseCommandInteraction(interaction);
+            // if (interaction instanceof Eris.CommandInteraction) {
+            //     switch (interaction.data.name) {
+            //         case 'card_name_search':
+            //             if (interaction.data.options) {
+            //                 const embed = await CardParsingManager.cardSearch(
+            //                     (<any>interaction.data.options[0]).value,
+            //                     'name',
+            //                 );
+            //                 if (embed)
+            //                     return interaction.createMessage({
+            //                         embeds: [embed.embed],
+            //                     });
+            //             }
+            //             return interaction.createMessage('No cards found');
+            //         // interaction.createMessage('boop');
+            //         // if (interaction.data.options) {
+            //         //     const messages = interaction.data.options;
+            //         //     console.log(messages);
+            //         // }
+            //         // const embed = await CardParsingManager.cardSearch(
+            //         //     (
+            //         //         await interaction.getOriginalMessage()
+            //         //     ).content,
+            //         // );
+            //         // if (embed)
+            //         //     return this.createMessage(interaction.channel.id, {
+            //         //         embed: embed.embed,
+            //         //     });
+            //         // return this.createMessage(
+            //         //     interaction.channel.id,
+            //         //     'Card not found or not a valid name',
+            //         // );
+            //     }
+            // }
         });
     }
 }

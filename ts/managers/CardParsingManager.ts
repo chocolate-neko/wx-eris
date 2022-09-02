@@ -112,6 +112,9 @@ export default class CardParsingManager {
                     })`,
                     sql`SELECT * FROM wixoss_en WHERE SIMILARITY(rarity, ${search}) > 0.7 OR levenshtein(rarity, ${search}) < 6`,
                 ];
+            case 'colour':
+            case 'skill':
+            case 'lifeburst':
             default:
                 return [
                     sql`SELECT * FROM wixoss_en`,
