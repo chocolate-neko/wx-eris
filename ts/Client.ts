@@ -6,6 +6,7 @@ import WikiManager from './managers/WikiManagerV2';
 import DBManager from './managers/DBManager';
 import CardParsingManager from './managers/CardParsingManager';
 import InteractionManager from './managers/InteractionManager';
+import GuildMemberManager from './managers/GuildMemberManager';
 
 // The path to the directory containing the commands.
 // No changes required unless directory is renamed or moved.
@@ -104,6 +105,11 @@ export class Bot extends Client {
                     this.user.username
                 }#${this.user.discriminator} successfully connected online!`,
             );
+        });
+
+        // Member join welcome message
+        this.on('guildMemberAdd', (guild, member) => {
+            GuildMemberManager.memberJoin(guild, member, this);
         });
 
         this.on('messageCreate', async (msg) => {
